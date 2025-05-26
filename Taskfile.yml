@@ -1,0 +1,27 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  init-cmake:
+    cmds:
+      - mkdir build
+      - cd build && cmake ..
+  build:
+    dir: "./build"
+    cmds:
+      - make
+  run:
+    dir: "./build"
+    cmds:
+      - task: build
+      - ./sealeo
+  lint:
+    cmds:
+      - clang-format --dry-run --Werror --style=file $(find src/ -name '*.cc' -o -name '*.h')
+  format:
+    cmds:
+      - clang-format -i --style=file $(find src/ -name '*.cc' -o -name '*.h')

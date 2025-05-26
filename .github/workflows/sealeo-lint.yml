@@ -1,0 +1,40 @@
+name: "[sealeo/lint] Run clint on src files"
+
+on:
+  push:
+    branches: ["main", "sealeo*"]
+    paths:
+      - "sealeo/**"
+      - ".github/workflows/sealeo-lint.yml"
+  pull_request:
+    branches: ["*"]
+    paths:
+      - "sealeo/**"
+      - ".github/workflows/sealeo-lint.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sealeo
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with: { python-version: "3.12" }
+
+      - name: Install LLVM 20
+        run: |
+            wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+            sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"
+            sudo apt update
+            sudo apt install llvm-20 llvm-20-dev llvm-20-tools clang-20 clang-tidy-20 clang-format-20 clang-tools-20 libclang-20-dev -y
+
+      - name: Run clang-format
+        run: |
+          clang-format-20 --dry-run --Werror --style=file $(find src/ -name '*.cc' -o -name '*.h')
